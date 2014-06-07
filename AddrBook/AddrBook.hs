@@ -14,6 +14,7 @@ addrBookLoop :: IConnection c => c -> AddrBookMonad
 addrBookLoop con = 
     try (processRecords con) <|>
     try (printCommand con)   <|>
+    try (insertUser con)     <|>
     try (insertCommand con)  <|>
     processQuit
 
@@ -47,6 +48,15 @@ printCommand con = do
             selectMisc con which
             dot <- getState
             liftIO $ printMisc dot
+
+insertUser :: IConnection c => c -> AddrBookMonad
+insertUser con = do
+    char 'i'
+    spaces
+    fName <- many $ noneOf " "
+    spaces
+    lName <- optionMaybe . many $ noneOf " "
+    liftIO $ insertPerson con fName lName
 
 insertCommand :: IConnection c => c -> AddrBookMonad
 insertCommand con = do
