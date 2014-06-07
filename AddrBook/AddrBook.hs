@@ -9,6 +9,7 @@ import AddrBook.InsertDB
 import AddrBook.PrintDB
 import AddrBook.SelectDB
 import AddrBook.Types
+import AddrBook.UpdateDB
 
 addrBookLoop :: IConnection c => c -> AddrBookMonad
 addrBookLoop con = 
@@ -16,6 +17,7 @@ addrBookLoop con =
     try (printCommand con)   <|>
     try (insertUser con)     <|>
     try (insertCommand con)  <|>
+    try (changeRecord con)   <|>
     processQuit
 
 processRecords :: IConnection c => c -> AddrBookMonad
@@ -71,6 +73,58 @@ insertCommand con = do
             spaces
             typ <- optionMaybe (many (noneOf " "))
             liftIO $ insertPhone con num typ which
+        'e' -> do
+            spaces
+            addr <- many (noneOf " ")
+            liftIO $ insertEmail con addr which
+        'a' -> do
+            spaces
+            char '"'
+            addr <- many (noneOf "\"")
+            char '"'
+            liftIO $ insertAddress con addr which
+        'm' -> do
+            spaces
+            char '"'
+            info <- many (noneOf "\"")
+            char '"'
+            liftIO $ insertMisc con info which
+
+changeRecord :: IConnection c => c -> AddrBookMonad
+changeRecord con = do
+    which <- digit
+    char 'c'
+    spaces
+    sub <- oneOf "upeam"
+    case sub of
+        'u' -> do
+            spaces
+            fName <- many $ noneOf " "
+            spaces
+            lName <- optionMaybe . many $ noneOf " "
+            liftIO $ updatePerson con fName lName which
+        'p' -> do
+            spaces
+            num <- many $ noneOf " "
+            spaces
+            typ <- optionMaybe . many $ noneOf " "
+            liftIO $ updatePhone con num typ which
+        'e' -> do
+            spaces
+            addr <- many $ noneOf " "
+            liftIO $ updateEmail con addr which
+        'a' -> do
+            spaces
+            char '"'
+            addr <- many $ noneOf "\""
+            char '"'
+            liftIO $ updateAddress con addr which
+        'm' -> do
+            spaces
+            char '"'
+            info <- many $ noneOf "\""
+            char '"'
+            liftIO $ updateMisc con info which
 
 processQuit :: AddrBookMonad
 processQuit = do

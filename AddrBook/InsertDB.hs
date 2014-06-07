@@ -6,6 +6,7 @@ module AddrBook.InsertDB
     , insertEmail
     , insertAddress
     , insertMisc
+    , maybeSql
     ) where
 
 import Data.Convertible
