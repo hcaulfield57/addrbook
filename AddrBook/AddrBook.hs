@@ -5,6 +5,7 @@ import Database.HDBC
 import System.Exit
 import Text.Parsec
 
+import AddrBook.DeleteDB
 import AddrBook.InsertDB
 import AddrBook.PrintDB
 import AddrBook.SelectDB
@@ -18,6 +19,7 @@ addrBookLoop con =
     try (insertUser con)     <|>
     try (insertCommand con)  <|>
     try (changeRecord con)   <|>
+    try (deleteRecord con)   <|>
     processQuit
 
 processRecords :: IConnection c => c -> AddrBookMonad
@@ -125,6 +127,19 @@ changeRecord con = do
             info <- many $ noneOf "\""
             char '"'
             liftIO $ updateMisc con info which
+
+deleteRecord :: IConnection c => c -> AddrBookMonad
+deleteRecord con = do
+    which <- digit
+    char 'd'
+    spaces
+    sub <- oneOf "upeam"
+    case sub of
+        'u' -> liftIO $ deletePerson con which
+        'p' -> liftIO $ deletePhone con which
+        'e' -> liftIO $ deleteEmail con which
+        'a' -> liftIO $ deleteAddress con which
+        'm' -> liftIO $ deleteMisc con which
 
 processQuit :: AddrBookMonad
 processQuit = do
