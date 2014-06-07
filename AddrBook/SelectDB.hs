@@ -1,6 +1,7 @@
 module AddrBook.SelectDB 
     ( selectUserIndex
     , selectPhones
+    , selectEmails
     ) where
 
 import Control.Monad.Trans (liftIO)
@@ -9,6 +10,8 @@ import Text.Parsec
 
 import AddrBook.PrintDB
 import AddrBook.Types
+
+-- Users
 
 selectUserIndex :: IConnection c => c -> AddrBookMonad
 selectUserIndex con = do
@@ -33,6 +36,8 @@ getUsers ((i:f:l:[]):us) =
         fname  = fromSql f
         lname  = fromSql l
     in User userid fname lname : getUsers us
+
+-- Phones
 
 selectPhones :: IConnection c => c -> Char -> AddrBookMonad
 selectPhones con start = do
@@ -62,3 +67,27 @@ getPhones ((i:n:t:u:[]):ps) =
         phoneT  = fromSql t
         user    = fromSql u
     in Phone phoneId number phoneT user : getPhones ps
+
+-- Emails
+
+selectEmails :: IConnection c => c -> Char -> AddrBookMonad
+selectEmails con which = do
+    res <- liftIO $ quickQuery' con
+        ("select E.EmailId "               ++
+              ", E.EmailAddress "          ++
+              ", E.PersonId "              ++
+           "from Email E "                 ++
+           "join Person P "                ++
+             "on E.PersonId = P.PersonId " ++
+          "where P.PersonId = ?; ")
+        [toSql which]
+    let emails = getEmails res
+    putState emails
+
+getEmails :: [[SqlValue]] -> [Dot]
+getEmails [] = []
+getEmails ((i:a:u:[]):es) =
+    let eid  = fromSql i
+        addr = fromSql a
+        user = fromSql u
+    in Email eid addr user : getEmails es

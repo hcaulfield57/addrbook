@@ -26,15 +26,19 @@ processRecords con = do
 
 printCommand :: IConnection c => c -> AddrBookMonad
 printCommand con = do
-    start <- digit
+    which <- digit
     char 'p'
     spaces 
-    sub <- oneOf "p"
+    sub <- oneOf "pe"
     case sub of 
         'p' -> do
-            selectPhones con start
+            selectPhones con which
             dot <- getState
             liftIO $ printPhones dot
+        'e' -> do
+            selectEmails con which
+            dot <- getState
+            liftIO $ printEmails dot
 
 range :: ParsecT String [Dot] IO Char
 range = char ',' >> digit

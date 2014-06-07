@@ -1,6 +1,7 @@
 module AddrBook.PrintDB
     ( printUserIndex
     , printPhones
+    , printEmails
     ) where
 
 import Control.Monad (when)
@@ -28,3 +29,10 @@ printPhones (p:ps) = do
         else do
             putStrLn ""
             printPhones ps
+
+printEmails :: [Dot] -> IO ()
+printEmails [] = return ()
+printEmails (e:es) = do
+    putStr $ (show $ emailId e) ++ " "
+    putStrLn $ emailAddr e
+    printEmails es
