@@ -37,10 +37,18 @@ mainLoop con = do
 connectDB :: Maybe FilePath -> IO Connection
 connectDB Nothing = do
     home <- getHomeDirectory
-    connectSqlite3 $ home ++ "/.addrbook.db"
+    con  <- connectSqlite3 $ home ++ "/.addrbook.db"
+    runRaw con "pragma foreign_keys = on;"
+    return con
 connectDB (Just home) = do
     -- make sure they didn't give us a directory
     isDir <- doesDirectoryExist home
     case isDir of
-        True  -> connectSqlite3 $ home ++ "/.addrbook.db"
-        False -> connectSqlite3 home
+        True  -> do 
+            con <- connectSqlite3 $ home ++ "/.addrbook.db"
+            runRaw con "pragma foreign_keys = on;"
+            return con
+        False -> do 
+            con <- connectSqlite3 home
+            runRaw con "pragma foreign_keys = on;"
+            return con

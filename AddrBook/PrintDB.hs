@@ -3,9 +3,9 @@ module AddrBook.PrintDB
     , printPhones
     , printEmails
     , printAddresses
+    , printMisc
     ) where
 
-import Control.Monad (when)
 import Database.HDBC
 
 import AddrBook.Types
@@ -44,3 +44,10 @@ printAddresses (a:as) = do
     putStr $ (show $ addressId a) ++ " "
     putStrLn $ addressAddr a
     printAddresses as
+
+printMisc :: [Dot] -> IO ()
+printMisc [] = return ()
+printMisc (m:ms) = do
+    putStr $ (show $ miscId m) ++ " "
+    putStrLn $ miscInfo m
+    printMisc ms

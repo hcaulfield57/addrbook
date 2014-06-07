@@ -29,7 +29,7 @@ printCommand con = do
     which <- digit
     char 'p'
     spaces 
-    sub <- oneOf "pea"
+    sub <- oneOf "peam"
     case sub of 
         'p' -> do
             selectPhones con which
@@ -43,6 +43,10 @@ printCommand con = do
             selectAddresses con which
             dot <- getState
             liftIO $ printAddresses dot
+        'm' -> do
+            selectMisc con which
+            dot <- getState
+            liftIO $ printMisc dot
 
 range :: ParsecT String [Dot] IO Char
 range = char ',' >> digit

@@ -3,6 +3,7 @@ module AddrBook.SelectDB
     , selectPhones
     , selectEmails
     , selectAddresses
+    , selectMisc
     ) where
 
 import Control.Monad.Trans (liftIO)
@@ -116,3 +117,27 @@ getAddresses ((i:a:u:[]):as) =
         addr = fromSql a
         user = fromSql u
     in Address aid addr user : getAddresses as
+
+-- Misc
+
+selectMisc :: IConnection c => c -> Char -> AddrBookMonad
+selectMisc con which = do
+    res <- liftIO $ quickQuery' con
+        ("select M.MiscId "                ++
+              ", M.MiscInfo "              ++
+              ", M.PersonId "              ++
+           "from Misc M "                  ++
+           "join Person P "                ++
+             "on M.PersonId = P.PersonId " ++
+          "where P.PersonId = ?; ")
+        [toSql which]
+    let misc = getMisc res
+    putState misc
+
+getMisc :: [[SqlValue]] -> [Dot]
+getMisc [] = []
+getMisc ((i:m:u:[]):ms) =
+    let mid  = fromSql i
+        info = fromSql m
+        user = fromSql u
+    in Misc mid info user : getMisc ms
