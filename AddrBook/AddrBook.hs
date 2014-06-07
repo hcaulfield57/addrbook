@@ -5,6 +5,7 @@ import Database.HDBC
 import System.Exit
 import Text.Parsec
 
+import AddrBook.InsertDB
 import AddrBook.PrintDB
 import AddrBook.SelectDB
 import AddrBook.Types
@@ -13,6 +14,7 @@ addrBookLoop :: IConnection c => c -> AddrBookMonad
 addrBookLoop con = 
     try (processRecords con) <|>
     try (printCommand con)   <|>
+    try (insertCommand con)  <|>
     processQuit
 
 processRecords :: IConnection c => c -> AddrBookMonad
@@ -21,8 +23,6 @@ processRecords con = do
     selectUserIndex con
     dot <- getState
     liftIO $ printUserIndex dot
-
--- Printing Subcommands
 
 printCommand :: IConnection c => c -> AddrBookMonad
 printCommand con = do
@@ -48,8 +48,19 @@ printCommand con = do
             dot <- getState
             liftIO $ printMisc dot
 
-range :: ParsecT String [Dot] IO Char
-range = char ',' >> digit
+insertCommand :: IConnection c => c -> AddrBookMonad
+insertCommand con = do
+    which <- digit
+    char 'i'
+    spaces
+    sub <- oneOf "peam"
+    case sub of
+        'p' -> do
+            spaces
+            num <- many (noneOf " ")
+            spaces
+            typ <- optionMaybe (many (noneOf " "))
+            liftIO $ insertPhone con num typ which
 
 processQuit :: AddrBookMonad
 processQuit = do
