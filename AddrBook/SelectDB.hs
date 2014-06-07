@@ -3,22 +3,25 @@ module AddrBook.SelectDB
     , selectPhones
     ) where
 
+import Control.Monad.Trans (liftIO)
 import Database.HDBC
+import Text.Parsec
 
 import AddrBook.PrintDB
 import AddrBook.Types
 
-selectUserIndex :: IConnection c => c -> IO [User]
+selectUserIndex :: IConnection c => c -> AddrBookMonad
 selectUserIndex con = do
-    res <- quickQuery' con
+    res <- liftIO $ quickQuery' con
         ("select PersonId "  ++
               ", FirstName " ++
               ", LastName "  ++
            "from Person; ")
         []
-    return $ getUsers res
+    let users = getUsers res
+    putState users
 
-getUsers :: [[SqlValue]] -> [User]
+getUsers :: [[SqlValue]] -> [Dot]
 getUsers [] = []
 getUsers ((i:f:[]):us) =
     let userid = fromSql i
@@ -31,20 +34,22 @@ getUsers ((i:f:l:[]):us) =
         lname  = fromSql l
     in User userid fname lname : getUsers us
 
-selectPhones :: IConnection c => c -> Char -> Maybe Char -> IO ()
-selectPhones con start Nothing = do
-    res <- quickQuery' con
+selectPhones :: IConnection c => c -> Char -> AddrBookMonad
+selectPhones con start = do
+    res <- liftIO $ quickQuery' con
         ("select Ph.PhoneId "               ++
               ", Ph.PhoneNumber "           ++
               ", Ph.PhoneType "             ++
-           "from Phone Ph "                ++
+              ", Ph.PersonId "              ++
+           "from Phone Ph "                 ++
            "join Person P "                 ++
              "on Ph.PersonId = P.PersonId " ++
           "where P.PersonId = ?; ")
         [toSql start]
-    printPhones $ getPhones res
+    let phones = getPhones res
+    putState phones
 
-getPhones :: [[SqlValue]] -> [Phone]
+getPhones :: [[SqlValue]] -> [Dot]
 getPhones [] = []
 getPhones ((i:n:u:[]):ps) = 
     let phoneId = fromSql i

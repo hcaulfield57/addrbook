@@ -9,8 +9,6 @@ import AddrBook.PrintDB
 import AddrBook.SelectDB
 import AddrBook.Types
 
-type AddrBookMonad = ParsecT String [User] IO ()
-
 addrBookLoop :: IConnection c => c -> AddrBookMonad
 addrBookLoop con = 
     try (processRecords con) <|>
@@ -20,23 +18,25 @@ addrBookLoop con =
 processRecords :: IConnection c => c -> AddrBookMonad
 processRecords con = do
     char ','
-    users <- liftIO $ selectUserIndex con
-    putState users
-    liftIO $ printUserIndex users
+    selectUserIndex con
+    dot <- getState
+    liftIO $ printUserIndex dot
 
 -- Printing Subcommands
 
 printCommand :: IConnection c => c -> AddrBookMonad
 printCommand con = do
     start <- digit
-    end   <- optionMaybe range
     char 'p'
     spaces 
     sub <- oneOf "p"
     case sub of 
-        'p' -> liftIO $ selectPhones con start end
+        'p' -> do
+            selectPhones con start
+            dot <- getState
+            liftIO $ printPhones dot
 
-range :: ParsecT String [User] IO Char
+range :: ParsecT String [Dot] IO Char
 range = char ',' >> digit
 
 processQuit :: AddrBookMonad

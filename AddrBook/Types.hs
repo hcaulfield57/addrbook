@@ -1,33 +1,36 @@
-module AddrBook.Types 
-    ( User(..)
-    , Phone(..)
-    , Email(..)
-    , Address(..)
-    , Misc(..)
-    ) where
+module AddrBook.Types (AddrBookMonad, Dot(..)) where
 
-data User = User
+import Text.Parsec
+
+-- Basic monad for the program.
+type AddrBookMonad = ParsecT String [Dot] IO ()
+
+-- Basic 'Dot' type, this provides the current state for the program, to
+-- determine what records a command addresses. Each constructor refers to
+-- a specific table in the database.
+data Dot 
+    = User
     { personId  :: Int
     , firstName :: String
     , lastName  :: String }
 
-data Phone = Phone
+    | Phone
     { phoneId     :: Int
     , phoneNumber :: String
     , phoneType   :: String
-    , phoneUid    :: Int }
+    , personId    :: Int }
 
-data Email = Email
+    | Email
     { emailId   :: Int
     , emailAddr :: String
-    , emailUid  :: Int }
+    , personId  :: Int }
 
-data Address = Address
+    | Address
     { addressId   :: Int
     , addressAddr :: String
-    , addressUid  :: Int }
+    , personId    :: Int }
 
-data Misc = Misc
+    | Misc
     { miscId   :: Int
     , miscInfo :: String
-    , miscUid  :: Int }
+    , personId :: Int }

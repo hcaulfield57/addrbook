@@ -3,11 +3,12 @@ module AddrBook.PrintDB
     , printPhones
     ) where
 
+import Control.Monad (when)
 import Database.HDBC
 
 import AddrBook.Types
 
-printUserIndex :: [User] -> IO ()
+printUserIndex :: [Dot] -> IO ()
 printUserIndex [] = return ()
 printUserIndex (u:us) = do
     putStr $ (show $ personId u) ++ " "
@@ -15,11 +16,15 @@ printUserIndex (u:us) = do
     putStrLn $ lastName u
     printUserIndex us
 
-printPhones :: [Phone] -> IO ()
+printPhones :: [Dot] -> IO ()
 printPhones [] = return ()
 printPhones (p:ps) = do
     putStr $ (show $ phoneId p) ++ " "
     putStr $ phoneNumber p
     if not $ null (phoneType p)
-        then putStrLn $ " - " ++ phoneType p
-        else putStrLn ""
+        then do
+            putStrLn $ " - " ++ phoneType p
+            printPhones ps
+        else do
+            putStrLn ""
+            printPhones ps
