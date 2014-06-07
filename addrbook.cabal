@@ -1,0 +1,14 @@
+name:          addrbook
+version:       0.1
+synopsis:      Simple Console Address Book
+license:       OtherLicense
+license-file:  LICENSE
+author:        Grant Mather
+maintainer:    hcaulfield57@gmail.com
+build-type:    Simple
+cabal-version: >= 1.2
+
+executable addrbook
+    main-is: AddrBook/Main.hs
+    build-depends: base, convertible, directory,
+        HDBC, HDBC-sqlite3, mtl, parsec
