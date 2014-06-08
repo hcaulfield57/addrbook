@@ -1,0 +1,6 @@
+- fix numbering of records
+- improve command language
+- improve error messages
+- prevent entering of incorrent information
+    in wrong category
+- remove language extension
