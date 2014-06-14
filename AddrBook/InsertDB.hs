@@ -21,7 +21,7 @@ insertPerson con fName lName = do
         [firstName, lastName]
     commit con
 
-insertPhone :: IConnection c => c -> String -> Maybe String -> Char -> IO ()
+insertPhone :: IConnection c => c -> String -> Maybe String -> String -> IO ()
 insertPhone con phoneN phoneT pid = do
     let phoneNumber = toSql phoneN
         phoneType   = maybeSql phoneT
@@ -31,7 +31,7 @@ insertPhone con phoneN phoneT pid = do
         [phoneNumber, phoneType, personId]
     commit con
 
-insertEmail :: IConnection c => c -> String -> Char -> IO ()
+insertEmail :: IConnection c => c -> String -> String -> IO ()
 insertEmail con emailAddr pid = do
     let emailAddress = toSql emailAddr
         personId     = toSql pid
@@ -40,7 +40,7 @@ insertEmail con emailAddr pid = do
         [emailAddress, personId]
     commit con
 
-insertAddress :: IConnection c => c -> String -> Char -> IO ()
+insertAddress :: IConnection c => c -> String -> String -> IO ()
 insertAddress con addressAddr pid = do
     let addressAddress = toSql addressAddr
         personId       = toSql pid
@@ -49,7 +49,7 @@ insertAddress con addressAddr pid = do
         [addressAddress, personId]
     commit con
 
-insertMisc :: IConnection c => c -> String -> Char -> IO ()
+insertMisc :: IConnection c => c -> String -> String -> IO ()
 insertMisc con misc pid = do
     let miscInfo = toSql misc
         personId = toSql pid

@@ -41,7 +41,7 @@ getUsers ((i:f:l:[]):us) =
 
 -- Phones
 
-selectPhones :: IConnection c => c -> Char -> AddrBookMonad
+selectPhones :: IConnection c => c -> String -> AddrBookMonad
 selectPhones con start = do
     res <- liftIO $ quickQuery' con
         ("select Ph.PhoneId "               ++
@@ -72,7 +72,7 @@ getPhones ((i:n:t:u:[]):ps) =
 
 -- Emails
 
-selectEmails :: IConnection c => c -> Char -> AddrBookMonad
+selectEmails :: IConnection c => c -> String -> AddrBookMonad
 selectEmails con which = do
     res <- liftIO $ quickQuery' con
         ("select E.EmailId "               ++
@@ -96,7 +96,7 @@ getEmails ((i:a:u:[]):es) =
 
 -- Addresses
 
-selectAddresses :: IConnection c => c -> Char -> AddrBookMonad
+selectAddresses :: IConnection c => c -> String -> AddrBookMonad
 selectAddresses con which = do
     res <- liftIO $ quickQuery' con
         ("select A.AddressId "             ++
@@ -120,7 +120,7 @@ getAddresses ((i:a:u:[]):as) =
 
 -- Misc
 
-selectMisc :: IConnection c => c -> Char -> AddrBookMonad
+selectMisc :: IConnection c => c -> String -> AddrBookMonad
 selectMisc con which = do
     res <- liftIO $ quickQuery' con
         ("select M.MiscId "                ++

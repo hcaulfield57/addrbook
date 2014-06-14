@@ -8,7 +8,7 @@ module AddrBook.DeleteDB
 
 import Database.HDBC
 
-deletePerson :: IConnection c => c -> Char -> IO ()
+deletePerson :: IConnection c => c -> String -> IO ()
 deletePerson con which = do
     let who = toSql which
     run con ("delete from Person " ++
@@ -16,7 +16,7 @@ deletePerson con which = do
         [who]
     commit con
 
-deletePhone :: IConnection c => c -> Char -> IO ()
+deletePhone :: IConnection c => c -> String -> IO ()
 deletePhone con which = do
     let who = toSql which
     run con ("delete from Phone " ++
@@ -24,7 +24,7 @@ deletePhone con which = do
         [who]
     commit con
 
-deleteEmail :: IConnection c => c -> Char -> IO ()
+deleteEmail :: IConnection c => c -> String -> IO ()
 deleteEmail con which = do
     let who = toSql which
     run con ("delete from Email " ++
@@ -32,7 +32,7 @@ deleteEmail con which = do
         [who]
     commit con
 
-deleteAddress :: IConnection c => c -> Char -> IO ()
+deleteAddress :: IConnection c => c -> String -> IO ()
 deleteAddress con which = do
     let who = toSql which
     run con ("delete from Address " ++
@@ -40,7 +40,7 @@ deleteAddress con which = do
         [who]
     commit con
 
-deleteMisc :: IConnection c => c -> Char -> IO ()
+deleteMisc :: IConnection c => c -> String -> IO ()
 deleteMisc con which = do
     let who = toSql which
     run con ("delete from Misc " ++

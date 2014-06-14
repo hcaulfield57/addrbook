@@ -27,11 +27,11 @@ processRecords con = do
     char ','
     selectUserIndex con
     dot <- getState
-    liftIO $ printUserIndex dot
+    liftIO $ printUserIndex 1 dot
 
 printCommand :: IConnection c => c -> AddrBookMonad
 printCommand con = do
-    which <- digit
+    which <- many digit
     char 'p'
     spaces 
     sub <- oneOf "peam"
@@ -39,19 +39,19 @@ printCommand con = do
         'p' -> do
             selectPhones con which
             dot <- getState
-            liftIO $ printPhones dot
+            liftIO $ printPhones 1 dot
         'e' -> do
             selectEmails con which
             dot <- getState
-            liftIO $ printEmails dot
+            liftIO $ printEmails 1 dot
         'a' -> do
             selectAddresses con which
             dot <- getState
-            liftIO $ printAddresses dot
+            liftIO $ printAddresses 1 dot
         'm' -> do
             selectMisc con which
             dot <- getState
-            liftIO $ printMisc dot
+            liftIO $ printMisc 1 dot
 
 insertUser :: IConnection c => c -> AddrBookMonad
 insertUser con = do
@@ -64,84 +64,99 @@ insertUser con = do
 
 insertCommand :: IConnection c => c -> AddrBookMonad
 insertCommand con = do
-    which <- digit
+    which <- many digit
     char 'i'
     spaces
     sub <- oneOf "peam"
+    who <- convertIndex which
     case sub of
         'p' -> do
             spaces
             num <- many (noneOf " ")
             spaces
             typ <- optionMaybe (many (noneOf " "))
-            liftIO $ insertPhone con num typ which
+            liftIO $ insertPhone con num typ who
         'e' -> do
             spaces
             addr <- many (noneOf " ")
-            liftIO $ insertEmail con addr which
+            liftIO $ insertEmail con addr who
         'a' -> do
             spaces
             char '"'
             addr <- many (noneOf "\"")
             char '"'
-            liftIO $ insertAddress con addr which
+            liftIO $ insertAddress con addr who
         'm' -> do
             spaces
             char '"'
             info <- many (noneOf "\"")
             char '"'
-            liftIO $ insertMisc con info which
+            liftIO $ insertMisc con info who
 
 changeRecord :: IConnection c => c -> AddrBookMonad
 changeRecord con = do
-    which <- digit
+    which <- many digit
     char 'c'
     spaces
     sub <- oneOf "upeam"
+    who <- convertIndex which
     case sub of
         'u' -> do
             spaces
             fName <- many $ noneOf " "
             spaces
             lName <- optionMaybe . many $ noneOf " "
-            liftIO $ updatePerson con fName lName which
+            liftIO $ updatePerson con fName lName who
         'p' -> do
             spaces
             num <- many $ noneOf " "
             spaces
             typ <- optionMaybe . many $ noneOf " "
-            liftIO $ updatePhone con num typ which
+            liftIO $ updatePhone con num typ who
         'e' -> do
             spaces
             addr <- many $ noneOf " "
-            liftIO $ updateEmail con addr which
+            liftIO $ updateEmail con addr who
         'a' -> do
             spaces
             char '"'
             addr <- many $ noneOf "\""
             char '"'
-            liftIO $ updateAddress con addr which
+            liftIO $ updateAddress con addr who
         'm' -> do
             spaces
             char '"'
             info <- many $ noneOf "\""
             char '"'
-            liftIO $ updateMisc con info which
+            liftIO $ updateMisc con info who
 
 deleteRecord :: IConnection c => c -> AddrBookMonad
 deleteRecord con = do
-    which <- digit
+    which <- many digit
     char 'd'
     spaces
     sub <- oneOf "upeam"
+    who <- convertIndex which
     case sub of
-        'u' -> liftIO $ deletePerson con which
-        'p' -> liftIO $ deletePhone con which
-        'e' -> liftIO $ deleteEmail con which
-        'a' -> liftIO $ deleteAddress con which
-        'm' -> liftIO $ deleteMisc con which
+        'u' -> liftIO $ deletePerson con who
+        'p' -> liftIO $ deletePhone con who
+        'e' -> liftIO $ deleteEmail con who
+        'a' -> liftIO $ deleteAddress con who
+        'm' -> liftIO $ deleteMisc con who
 
 processQuit :: AddrBookMonad
 processQuit = do
     char 'q'
     liftIO exitSuccess
+
+convertIndex :: String -> ParsecT String [Dot] IO String
+convertIndex i = do
+    dot <- getState
+    let intVal = read i
+    return $ getId intVal dot
+  where getId 1 ((User { personId = idVal }):_) = show $ idVal
+        getId 1 ((Phone { phoneId = idVal }):_) = show $ idVal
+        getId 1 ((Email { emailId = idVal }):_) = show $ idVal
+        getId 1 ((Address { addressId = idVal }):_) = show $ idVal
+        getId 1 ((Misc { miscId = idVal }):_) = show $ idVal
+        getId i (d:ds) = getId (i-1) ds

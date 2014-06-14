@@ -10,7 +10,7 @@ import Database.HDBC
 
 import AddrBook.InsertDB (maybeSql)
 
-updatePerson :: IConnection c => c -> String -> Maybe String -> Char -> IO ()
+updatePerson :: IConnection c => c -> String -> Maybe String -> String -> IO ()
 updatePerson con fname lname which = do
     let firstName = toSql fname
         lastName  = maybeSql lname
@@ -22,7 +22,7 @@ updatePerson con fname lname which = do
         [firstName, lastName, who]
     commit con
 
-updatePhone :: IConnection c => c -> String -> Maybe String -> Char -> IO ()
+updatePhone :: IConnection c => c -> String -> Maybe String -> String -> IO ()
 updatePhone con num typ which = do
     let number = toSql num
         phoneT = maybeSql typ
@@ -34,7 +34,7 @@ updatePhone con num typ which = do
         [number, phoneT, who]
     commit con
 
-updateEmail :: IConnection c => c -> String -> Char -> IO ()
+updateEmail :: IConnection c => c -> String -> String -> IO ()
 updateEmail con eaddr which = do
     let emailAddr = toSql eaddr
         who       = toSql which
@@ -44,7 +44,7 @@ updateEmail con eaddr which = do
         [emailAddr, who]
     commit con
 
-updateAddress :: IConnection c => c -> String -> Char -> IO ()
+updateAddress :: IConnection c => c -> String -> String -> IO ()
 updateAddress con addr which = do
     let addrA = toSql addr
         who   = toSql which
@@ -54,7 +54,7 @@ updateAddress con addr which = do
         [addrA, who]
     commit con
 
-updateMisc :: IConnection c => c -> String -> Char -> IO ()
+updateMisc :: IConnection c => c -> String -> String -> IO ()
 updateMisc con info which = do
     let miscInfo = toSql info
         who      = toSql which
