@@ -9,30 +9,31 @@ import Text.Parsec
 
 import AddrBook.AddrBook
 import AddrBook.CreateDB
+import AddrBook.Types
 import AddrBook.Usage
 
 main :: IO ()
 main = do
     argv <- getArgs
     case argv of
-        ("-d":path:[]) -> connectDB (Just path) >>= mainLoop
+        ("-d":path:[]) -> connectDB (Just path) >>= mainLoop []
         ("-c":[])      -> connectDB Nothing >>= createDB
-        []             -> connectDB Nothing >>= mainLoop
+        []             -> connectDB Nothing >>= mainLoop []
         -- unrecognized options
         _              -> usage Nothing True
 
-mainLoop :: IConnection c => c -> IO ()
-mainLoop con = do
+mainLoop :: IConnection c => [Dot] -> c -> IO ()
+mainLoop dot con = do
     putStr "? "
     hFlush stdout
     input <- getLine 
     res   <- 
-        runParserT (addrBookLoop con) [] "addrbook" input
+        runParserT (addrBookLoop con) dot "addrbook" input
     case res of
         (Left parseError) -> 
             hPutStr stderr (show parseError) >>
-            mainLoop con
-        (Right success)   -> mainLoop con
+            mainLoop dot con
+        (Right dot')   -> mainLoop dot' con
 
 connectDB :: Maybe FilePath -> IO Connection
 connectDB Nothing = do

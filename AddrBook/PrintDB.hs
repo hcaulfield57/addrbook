@@ -12,7 +12,7 @@ import AddrBook.Types
 
 printUserIndex :: Int -> [Dot] -> IO ()
 printUserIndex _ [] = return ()
-printUserIndex i (u:us) = do
+printUserIndex i dot@(u:us) = do
     putStr $ show i ++ " "
     putStr $ firstName u ++ ", "
     putStrLn $ lastName u

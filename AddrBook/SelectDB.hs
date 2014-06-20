@@ -15,7 +15,7 @@ import AddrBook.Types
 
 -- Users
 
-selectUserIndex :: IConnection c => c -> AddrBookMonad
+selectUserIndex :: IConnection c => c -> AddrVoid
 selectUserIndex con = do
     res <- liftIO $ quickQuery' con
         ("select PersonId "  ++
@@ -41,7 +41,7 @@ getUsers ((i:f:l:[]):us) =
 
 -- Phones
 
-selectPhones :: IConnection c => c -> String -> AddrBookMonad
+selectPhones :: IConnection c => c -> String -> AddrVoid
 selectPhones con start = do
     res <- liftIO $ quickQuery' con
         ("select Ph.PhoneId "               ++
@@ -72,7 +72,7 @@ getPhones ((i:n:t:u:[]):ps) =
 
 -- Emails
 
-selectEmails :: IConnection c => c -> String -> AddrBookMonad
+selectEmails :: IConnection c => c -> String -> AddrVoid
 selectEmails con which = do
     res <- liftIO $ quickQuery' con
         ("select E.EmailId "               ++
@@ -96,7 +96,7 @@ getEmails ((i:a:u:[]):es) =
 
 -- Addresses
 
-selectAddresses :: IConnection c => c -> String -> AddrBookMonad
+selectAddresses :: IConnection c => c -> String -> AddrVoid
 selectAddresses con which = do
     res <- liftIO $ quickQuery' con
         ("select A.AddressId "             ++
@@ -120,7 +120,7 @@ getAddresses ((i:a:u:[]):as) =
 
 -- Misc
 
-selectMisc :: IConnection c => c -> String -> AddrBookMonad
+selectMisc :: IConnection c => c -> String -> AddrVoid
 selectMisc con which = do
     res <- liftIO $ quickQuery' con
         ("select M.MiscId "                ++

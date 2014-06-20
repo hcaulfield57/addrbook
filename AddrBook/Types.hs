@@ -1,9 +1,14 @@
-module AddrBook.Types (AddrBookMonad, Dot(..)) where
+module AddrBook.Types
+    ( AddrBook
+    , AddrVoid
+    , Dot(..)
+    ) where
 
 import Text.Parsec
 
 -- Basic monad for the program.
-type AddrBookMonad = ParsecT String [Dot] IO ()
+type AddrBook = ParsecT String [Dot] IO [Dot]
+type AddrVoid = ParsecT String [Dot] IO ()
 
 -- Basic 'Dot' type, this provides the current state for the program, to
 -- determine what records a command addresses. Each constructor refers to
@@ -34,3 +39,4 @@ data Dot
     { miscId   :: Int
     , miscInfo :: String
     , personId :: Int }
+    deriving Show
