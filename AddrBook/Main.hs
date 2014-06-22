@@ -2,38 +2,41 @@ module Main (main) where
 
 import Database.HDBC
 import Database.HDBC.Sqlite3
+import System.Console.GetOpt
 import System.Directory
 import System.Environment
-import System.IO
-import Text.Parsec
 
-import AddrBook.AddrBook
 import AddrBook.CreateDB
-import AddrBook.Types
-import AddrBook.Usage
+import AddrBook.Err
+
+data Flag = Path String | Create
+
+flags :: [OptDescr Flag]
+flags = 
+    [ Option ['p'] [] (ReqArg Path "PATH") []
+    , Option ['c'] [] (NoArg Create) [] ]
 
 main :: IO ()
 main = do
     argv <- getArgs
-    case argv of
-        ("-d":path:[]) -> connectDB (Just path) >>= mainLoop []
-        ("-c":[])      -> connectDB Nothing >>= createDB
-        []             -> connectDB Nothing >>= mainLoop []
-        -- unrecognized options
-        _              -> usage Nothing True
+    let opts = getOpt RequireOrder flags argv
+    case opts of
+        (o, _, [])  -> do
+            let path = isPath o
+                make = isCreate o
+            case make of
+                True  -> connectDB path >>= createDB >>= mainLoop
+                False -> connectDB path >>= mainLoop
+        (_, _, e)   -> err 1 usage
+        (_, _, []) -> connectDB Nothing >>= mainLoop
 
-mainLoop :: IConnection c => [Dot] -> c -> IO ()
-mainLoop dot con = do
-    putStr "? "
-    hFlush stdout
-    input <- getLine 
-    res   <- 
-        runParserT (addrBookLoop con) dot "addrbook" input
-    case res of
-        (Left parseError) -> 
-            hPutStr stderr (show parseError) >>
-            mainLoop dot con
-        (Right dot')   -> mainLoop dot' con
+  where isPath []            = Nothing
+        isPath ((Path x):fs) = Just x
+        isPath (_:fs)        = isPath fs
+
+        isCreate []          = False
+        isCreate (Create:fs) = True
+        isCreate (_:fs)      = isCreate fs
 
 connectDB :: Maybe FilePath -> IO Connection
 connectDB Nothing = do
@@ -42,14 +45,16 @@ connectDB Nothing = do
     runRaw con "pragma foreign_keys = on;"
     return con
 connectDB (Just home) = do
-    -- make sure they didn't give us a directory
+    -- if it's a directory, append name to end
     isDir <- doesDirectoryExist home
-    case isDir of
-        True  -> do 
-            con <- connectSqlite3 $ home ++ "/.addrbook.db"
-            runRaw con "pragma foreign_keys = on;"
-            return con
-        False -> do 
-            con <- connectSqlite3 home
-            runRaw con "pragma foreign_keys = on;"
-            return con
+    let path = if isDir
+               then path ++ "/.addrbook.db"
+               else home
+    con <- connectSqlite3 $ path
+    runRaw con "pragma foreign_keys = on;"
+    return con
+
+usage :: String
+usage = "usage: addrbook [-c | -p path]"
+
+mainLoop = undefined

@@ -1,4 +1,4 @@
-module Err (err) where
+module AddrBook.Err (err) where
 
 import System.Environment
 import System.Exit
