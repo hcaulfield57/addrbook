@@ -28,7 +28,7 @@ main = do
                 True  -> connectDB path >>= createDB >>= mainLoop
                 False -> connectDB path >>= mainLoop
         (_, _, e)   -> err 1 usage
-        (_, _, []) -> connectDB Nothing >>= mainLoop
+        (_, _, [])  -> connectDB Nothing >>= mainLoop
 
   where isPath []            = Nothing
         isPath ((Path x):fs) = Just x
